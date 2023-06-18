@@ -1,7 +1,7 @@
 spring.data.mongodb.database=
 spring.data.mongodb.uri=
 
-spring.mvc.pathmatch.matching-strategy=
-spring.servlet.multipart.max-file-size=
-spring.servlet.multipart.max-request-size=
-spring.servlet.multipart.enabled=
+spring.mvc.pathmatch.matching-strategy=ANT_PATH_MATCHER
+spring.servlet.multipart.max-file-size=256MB
+spring.servlet.multipart.max-request-size=256MB
+spring.servlet.multipart.enabled=true
