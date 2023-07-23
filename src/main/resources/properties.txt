@@ -1,0 +1,7 @@
+spring.data.mongodb.database=
+spring.data.mongodb.uri=
+
+spring.mvc.pathmatch.matching-strategy=
+spring.servlet.multipart.max-file-size=
+spring.servlet.multipart.max-request-size=
+spring.servlet.multipart.enabled=
