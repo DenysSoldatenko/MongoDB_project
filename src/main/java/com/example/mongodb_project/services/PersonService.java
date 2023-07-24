@@ -20,4 +20,8 @@ public interface PersonService {
   List<Person> getByPersonAge(Integer minAge, Integer maxAge);
 
   Page<Person> search(String name, Integer minAge, Integer maxAge, String city, Pageable pageable);
+
+  List<Document> getOldestPersonByCities();
+
+  Document getOldestPersonByCity(String city);
 }

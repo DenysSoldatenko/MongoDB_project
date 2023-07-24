@@ -52,4 +52,14 @@ public class PersonController {
     Pageable pageable = PageRequest.of(page, size);
     return personService.search(name, minAge, maxAge, city, pageable);
   }
+
+  @GetMapping("/oldestPersonByCities")
+  public List<Document> getOldestPersonByCities() {
+    return personService.getOldestPersonByCities();
+  }
+
+  @GetMapping("/oldestPersonByCity")
+  public Document getOldestPersonByCity(@RequestParam("name") String name) {
+    return personService.getOldestPersonByCity(name);
+  }
 }

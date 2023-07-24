@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.aggregation.SortOperation;
 import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
@@ -83,5 +84,51 @@ public class PersonServiceImpl implements PersonService {
       mongoTemplate.find(query, Person.class),
       pageable,
       () -> mongoTemplate.count(query.skip(0).limit(0), Person.class));
+  }
+
+  @Override
+  public List<Document> getOldestPersonByCities() {
+    UnwindOperation unwindOperation = Aggregation
+         .unwind("addresses");
+
+    SortOperation sortOperation = Aggregation
+        .sort(Sort.Direction.DESC, "age");
+
+    GroupOperation groupOperation = Aggregation
+        .group("addresses.city")
+        .first(Aggregation.ROOT)
+        .as("oldestPerson");
+
+    Aggregation aggregation = Aggregation
+        .newAggregation(unwindOperation, sortOperation, groupOperation);
+
+    return mongoTemplate
+        .aggregate(aggregation, Person.class, Document.class)
+        .getMappedResults();
+  }
+
+  @Override
+  public Document getOldestPersonByCity(String cityName) {
+    UnwindOperation unwindOperation = Aggregation
+        .unwind("addresses");
+
+    MatchOperation matchOperation = Aggregation
+        .match(Criteria.where("addresses.city").is(cityName));
+
+    SortOperation sortOperation = Aggregation
+        .sort(Sort.Direction.DESC, "age");
+
+    GroupOperation groupOperation = Aggregation
+        .group("addresses.city")
+        .first(Aggregation.ROOT)
+        .as("oldestPerson");
+
+    Aggregation aggregation = Aggregation
+        .newAggregation(unwindOperation, matchOperation, sortOperation, groupOperation);
+
+    return mongoTemplate
+        .aggregate(aggregation, Person.class, Document.class)
+        .getMappedResults()
+        .get(0);
   }
 }
