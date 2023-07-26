@@ -1,7 +1,7 @@
-package com.example.mongodb_project.services;
+package com.example.project.services;
 
-import com.example.mongodb_project.collections.Person;
-import com.example.mongodb_project.repositories.PersonRepository;
+import com.example.project.collections.Person;
+import com.example.project.repositories.PersonRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.Document;
@@ -130,5 +130,32 @@ public class PersonServiceImpl implements PersonService {
         .aggregate(aggregation, Person.class, Document.class)
         .getMappedResults()
         .get(0);
+  }
+
+  @Override
+  public List<Document> getPopulationByCity() {
+    UnwindOperation unwindOperation = Aggregation
+        .unwind("addresses");
+
+    GroupOperation groupOperation = Aggregation
+        .group("addresses.city").count().as("popCount");
+
+    SortOperation sortOperation = Aggregation
+        .sort(Sort.Direction.DESC, "popCount");
+
+    ProjectionOperation projectionOperation = Aggregation
+        .project()
+        .andExpression("_id")
+        .as("city")
+        .andExpression("popCount")
+        .as("count")
+        .andExclude("_id");
+
+    Aggregation aggregation = Aggregation
+        .newAggregation(unwindOperation, groupOperation, sortOperation, projectionOperation);
+
+    return mongoTemplate
+        .aggregate(aggregation, Person.class, Document.class)
+        .getMappedResults();
   }
 }

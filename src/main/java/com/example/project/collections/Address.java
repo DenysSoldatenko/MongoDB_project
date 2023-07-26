@@ -1,4 +1,4 @@
-package com.example.mongodb_project.collections;
+package com.example.project.collections;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,6 +1,6 @@
-package com.example.mongodb_project.services;
+package com.example.project.services;
 
-import com.example.mongodb_project.collections.Person;
+import com.example.project.collections.Person;
 import java.util.List;
 import org.bson.Document;
 import org.springframework.data.domain.Page;
@@ -24,4 +24,6 @@ public interface PersonService {
   List<Document> getOldestPersonByCities();
 
   Document getOldestPersonByCity(String city);
+
+  List<Document> getPopulationByCity();
 }

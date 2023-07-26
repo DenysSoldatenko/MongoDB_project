@@ -1,4 +1,4 @@
-package com.example.mongodb_project.configurations;
+package com.example.project.configurations;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

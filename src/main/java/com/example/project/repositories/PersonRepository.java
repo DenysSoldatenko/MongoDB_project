@@ -1,6 +1,6 @@
-package com.example.mongodb_project.repositories;
+package com.example.project.repositories;
 
-import com.example.mongodb_project.collections.Person;
+import com.example.project.collections.Person;
 import java.util.List;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
