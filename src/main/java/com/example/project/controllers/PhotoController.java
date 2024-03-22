@@ -1,13 +1,14 @@
 package com.example.project.controllers;
 
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
+
 import com.example.project.collections.Photo;
 import com.example.project.services.PhotoService;
 import java.io.IOException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,15 +22,11 @@ import org.springframework.web.multipart.MultipartFile;
  * REST controller for managing Photo objects.
  */
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/photo")
 public class PhotoController {
 
   private final PhotoService photoService;
-
-  @Autowired
-  public PhotoController(PhotoService photoService) {
-    this.photoService = photoService;
-  }
 
   @PostMapping
   public String addPhoto(@RequestParam("image") MultipartFile image) throws IOException {
@@ -48,8 +45,8 @@ public class PhotoController {
     Resource resource = new ByteArrayResource(photo.getPhoto().getData());
 
     return ResponseEntity.ok()
-       .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + photo.getTitle() + "\"")
-       .contentType(MediaType.APPLICATION_OCTET_STREAM)
+       .header(CONTENT_DISPOSITION, "attachment; filename=\"" + photo.getTitle() + "\"")
+       .contentType(APPLICATION_OCTET_STREAM)
        .body(resource);
   }
 }

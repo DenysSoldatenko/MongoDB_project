@@ -1,14 +1,24 @@
-package com.example.project.services;
+package com.example.project.services.impl;
+
+import static org.springframework.data.domain.Sort.Direction.DESC;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.ROOT;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.unwind;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 import com.example.project.collections.Person;
 import com.example.project.repositories.PersonRepository;
+import com.example.project.services.PersonService;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.bson.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.GroupOperation;
@@ -25,17 +35,12 @@ import org.springframework.stereotype.Service;
  * Service implementation for managing Person objects.
  */
 @Service
+@RequiredArgsConstructor
 public class PersonServiceImpl implements PersonService {
 
   private final PersonRepository personRepository;
 
   private final MongoTemplate mongoTemplate;
-
-  @Autowired
-  public PersonServiceImpl(PersonRepository personRepository, MongoTemplate mongoTemplate) {
-    this.personRepository = personRepository;
-    this.mongoTemplate = mongoTemplate;
-  }
 
   @Override
   public String save(Person person) {
@@ -61,20 +66,21 @@ public class PersonServiceImpl implements PersonService {
   public Page<Person> search(String name, Integer minAge, Integer maxAge,
                              String city, Pageable pageable) {
 
-    Query query = new Query().with(pageable);
     List<Criteria> criteria = new ArrayList<>();
 
     if (name != null && !name.isEmpty()) {
-      criteria.add(Criteria.where("firstName").regex(name, "i"));
+      criteria.add(where("firstName").regex(name, "i"));
     }
 
     if (minAge != null && maxAge != null) {
-      criteria.add(Criteria.where("age").gte(minAge).lte(maxAge));
+      criteria.add(where("age").gte(minAge).lte(maxAge));
     }
 
     if (city != null && !city.isEmpty()) {
-      criteria.add(Criteria.where("addresses.city").is(city));
+      criteria.add(where("addresses.city").is(city));
     }
+
+    Query query = new Query().with(pageable);
 
     if (!criteria.isEmpty()) {
       query.addCriteria(new Criteria().andOperator(criteria.toArray(new Criteria[0])));
@@ -83,79 +89,54 @@ public class PersonServiceImpl implements PersonService {
     return PageableExecutionUtils.getPage(
       mongoTemplate.find(query, Person.class),
       pageable,
-      () -> mongoTemplate.count(query.skip(0).limit(0), Person.class));
+      () -> mongoTemplate.count(query.skip(0).limit(0), Person.class)
+    );
   }
 
   @Override
   public List<Document> getOldestPersonByCities() {
-    UnwindOperation unwindOperation = Aggregation
-         .unwind("addresses");
-
-    SortOperation sortOperation = Aggregation
-        .sort(Sort.Direction.DESC, "age");
-
-    GroupOperation groupOperation = Aggregation
-        .group("addresses.city")
-        .first(Aggregation.ROOT)
-        .as("oldestPerson");
-
-    Aggregation aggregation = Aggregation
-        .newAggregation(unwindOperation, sortOperation, groupOperation);
-
-    return mongoTemplate
-        .aggregate(aggregation, Person.class, Document.class)
-        .getMappedResults();
+    UnwindOperation unwindOperation = unwind("addresses");
+    SortOperation sortOperation = sort(DESC, "age");
+    GroupOperation groupOperation = group("addresses.city").first(ROOT).as("oldestPerson");
+    Aggregation aggregation = newAggregation(unwindOperation, sortOperation, groupOperation);
+    return mongoTemplate.aggregate(aggregation, Person.class, Document.class).getMappedResults();
   }
 
   @Override
   public Document getOldestPersonByCity(String cityName) {
-    UnwindOperation unwindOperation = Aggregation
-        .unwind("addresses");
+    UnwindOperation unwindOperation = unwind("addresses");
+    MatchOperation matchOperation = match(where("addresses.city").is(cityName));
+    SortOperation sortOperation = sort(DESC, "age");
+    GroupOperation groupOperation = group("addresses.city").first(ROOT).as("oldestPerson");
 
-    MatchOperation matchOperation = Aggregation
-        .match(Criteria.where("addresses.city").is(cityName));
+    Aggregation aggregation = newAggregation(
+        unwindOperation, matchOperation,
+        sortOperation, groupOperation
+    );
 
-    SortOperation sortOperation = Aggregation
-        .sort(Sort.Direction.DESC, "age");
-
-    GroupOperation groupOperation = Aggregation
-        .group("addresses.city")
-        .first(Aggregation.ROOT)
-        .as("oldestPerson");
-
-    Aggregation aggregation = Aggregation
-        .newAggregation(unwindOperation, matchOperation, sortOperation, groupOperation);
-
-    return mongoTemplate
-        .aggregate(aggregation, Person.class, Document.class)
+    return mongoTemplate.aggregate(aggregation, Person.class, Document.class)
         .getMappedResults()
         .get(0);
   }
 
   @Override
   public List<Document> getPopulationByCity() {
-    UnwindOperation unwindOperation = Aggregation
-        .unwind("addresses");
+    UnwindOperation unwindOperation = unwind("addresses");
+    GroupOperation groupOperation = group("addresses.city").count().as("popCount");
+    SortOperation sortOperation = sort(DESC, "popCount");
 
-    GroupOperation groupOperation = Aggregation
-        .group("addresses.city").count().as("popCount");
-
-    SortOperation sortOperation = Aggregation
-        .sort(Sort.Direction.DESC, "popCount");
-
-    ProjectionOperation projectionOperation = Aggregation
-        .project()
+    ProjectionOperation projectionOperation = project()
         .andExpression("_id")
         .as("city")
         .andExpression("popCount")
         .as("count")
         .andExclude("_id");
 
-    Aggregation aggregation = Aggregation
-        .newAggregation(unwindOperation, groupOperation, sortOperation, projectionOperation);
+    Aggregation aggregation = newAggregation(
+        unwindOperation, groupOperation,
+        sortOperation, projectionOperation
+    );
 
-    return mongoTemplate
-        .aggregate(aggregation, Person.class, Document.class)
-        .getMappedResults();
+    return mongoTemplate.aggregate(aggregation, Person.class, Document.class).getMappedResults();
   }
 }
