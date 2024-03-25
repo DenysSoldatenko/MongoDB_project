@@ -3,8 +3,8 @@ spring:
     import: optional:file:.env[.properties]
   data:
     mongodb:
-      database: ${DATA_SOURCE_NAME}
-      uri: ${DATA_SOURCE_URI}
+      database: ${SPRING_DATA_SOURCE_NAME}
+      uri: ${SPRING_DATA_SOURCE_URI}
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
