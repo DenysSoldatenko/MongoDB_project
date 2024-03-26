@@ -1,6 +1,9 @@
 package com.example.project.collections;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,11 +20,21 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter
 @Setter
 @Document(collection = "photo")
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(NON_NULL)
 public class Photo {
 
   @Id
+  @Schema(hidden = true)
   private String id;
+
+  @Schema(
+      description = "Title of the photo",
+      example = "Vacation Photo"
+  )
   private String title;
+
+  @Schema(
+      description = "Binary data of the photo"
+  )
   private Binary photo;
 }
