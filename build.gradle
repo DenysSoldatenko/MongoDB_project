@@ -24,8 +24,11 @@ repositories {
 dependencies {
     implementation "org.springframework.boot:spring-boot-starter-data-mongodb:${springBootVersion}"
     implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
-    implementation "io.springfox:springfox-boot-starter:${springDocWebVersion}"
-    implementation "io.springfox:springfox-swagger-ui:${springDocWebVersion}"
+
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${springDocWebVersion}"){
+        exclude group: "io.swagger.core.v3", module:"swagger-annotations"
+    }
+    implementation "io.swagger.core.v3:swagger-annotations:${swaggerAnnotationsVersion}"
 
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
