@@ -5,6 +5,9 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 
 import com.example.project.collections.Photo;
 import com.example.project.services.PhotoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
@@ -24,22 +27,48 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/photo")
+@Tag(name = "Photo Management", description = "Endpoints for managing photos")
 public class PhotoController {
 
   private final PhotoService photoService;
 
+  /**
+   * Uploads a new photo and saves it with the given title.
+   *
+   * @param image The photo file to be uploaded.
+   * @return A confirmation message indicating the result of the upload.
+   * @throws IOException If an I/O error occurs during file handling.
+   */
   @PostMapping
+  @Operation(
+      summary = "Upload a new photo",
+      description = "Uploads a photo and saves it with the given title.",
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Photo successfully uploaded"),
+        @ApiResponse(responseCode = "400", description = "Invalid file format or empty file"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+      }
+  )
   public String addPhoto(@RequestParam("image") MultipartFile image) throws IOException {
     return photoService.addPhoto(image.getOriginalFilename(), image);
   }
 
   /**
-   * Endpoint to download a photo by its ID.
+   * Downloads a photo by its ID.
    *
-   * @param id the ID of the photo to download
-   * @return a ResponseEntity containing the photo as a Resource to download
+   * @param id The ID of the photo to download.
+   * @return A {@link ResponseEntity} containing the photo as a {@link Resource} to download.
    */
   @GetMapping("/{id}")
+  @Operation(
+      summary = "Download a photo by ID",
+      description = "Retrieves a photo by its ID and returns it as a downloadable file.",
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Photo successfully retrieved"),
+        @ApiResponse(responseCode = "404", description = "Photo not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+      }
+  )
   public ResponseEntity<Resource> downloadPhoto(@PathVariable String id) {
     Photo photo = photoService.getPhoto(id);
     Resource resource = new ByteArrayResource(photo.getPhoto().getData());
