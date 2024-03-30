@@ -1,5 +1,9 @@
 package com.example.project.controllers;
 
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
+
 import com.example.project.collections.Person;
 import com.example.project.services.PersonService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -35,11 +40,12 @@ public class PersonController {
 
   @Operation(summary = "Add a new person")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Person added successfully"),
+    @ApiResponse(responseCode = "201", description = "Person added successfully"),
     @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
   })
   @PostMapping
+  @ResponseStatus(CREATED)
   public String addPerson(@RequestBody Person person) {
     return personService.save(person);
   }
@@ -51,17 +57,19 @@ public class PersonController {
     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
   })
   @GetMapping
+  @ResponseStatus(OK)
   public List<Person> getPersonStartWith(@RequestParam("name") String name) {
     return personService.getPersonStartWith(name);
   }
 
   @Operation(summary = "Remove a person by ID")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Person removed successfully"),
+    @ApiResponse(responseCode = "204", description = "Person removed successfully"),
     @ApiResponse(responseCode = "404", description = "Person not found", content = @Content),
     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
   })
   @DeleteMapping("/{id}")
+  @ResponseStatus(NO_CONTENT)
   public void removePerson(@PathVariable String id) {
     personService.delete(id);
   }
@@ -73,6 +81,7 @@ public class PersonController {
     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
   })
   @GetMapping("/age")
+  @ResponseStatus(OK)
   public List<Person> getByPersonAge(@RequestParam Integer minAge, @RequestParam Integer maxAge) {
     return personService.getByPersonAge(minAge, maxAge);
   }
@@ -84,6 +93,7 @@ public class PersonController {
     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
   })
   @GetMapping("/search")
+  @ResponseStatus(OK)
   public Page<Person> searchPerson(
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Integer minAge,
@@ -103,6 +113,7 @@ public class PersonController {
     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
   })
   @GetMapping("/oldestPersonByCities")
+  @ResponseStatus(OK)
   public List<Document> getOldestPersonByCities() {
     return personService.getOldestPersonByCities();
   }
@@ -114,6 +125,7 @@ public class PersonController {
     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
   })
   @GetMapping("/oldestPersonByCity")
+  @ResponseStatus(OK)
   public Document getOldestPersonByCity(@RequestParam("name") String name) {
     return personService.getOldestPersonByCity(name);
   }
@@ -125,6 +137,7 @@ public class PersonController {
     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
   })
   @GetMapping("/populationByCity")
+  @ResponseStatus(OK)
   public List<Document> getPopulationByCity() {
     return personService.getPopulationByCity();
   }

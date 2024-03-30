@@ -1,6 +1,7 @@
 package com.example.project.controllers;
 
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 
 import com.example.project.collections.Photo;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,38 +29,26 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/photo")
-@Tag(name = "Photo Management", description = "Endpoints for managing photos")
+@Tag(name = "Photo Controller", description = "Endpoints for managing photos")
 public class PhotoController {
 
   private final PhotoService photoService;
 
-  /**
-   * Uploads a new photo and saves it with the given title.
-   *
-   * @param image The photo file to be uploaded.
-   * @return A confirmation message indicating the result of the upload.
-   * @throws IOException If an I/O error occurs during file handling.
-   */
   @PostMapping
   @Operation(
       summary = "Upload a new photo",
       description = "Uploads a photo and saves it with the given title.",
       responses = {
-        @ApiResponse(responseCode = "200", description = "Photo successfully uploaded"),
+        @ApiResponse(responseCode = "201", description = "Photo successfully uploaded"),
         @ApiResponse(responseCode = "400", description = "Invalid file format or empty file"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
       }
   )
+  @ResponseStatus(CREATED)
   public String addPhoto(@RequestParam("image") MultipartFile image) throws IOException {
     return photoService.addPhoto(image.getOriginalFilename(), image);
   }
 
-  /**
-   * Downloads a photo by its ID.
-   *
-   * @param id The ID of the photo to download.
-   * @return A {@link ResponseEntity} containing the photo as a {@link Resource} to download.
-   */
   @GetMapping("/{id}")
   @Operation(
       summary = "Download a photo by ID",

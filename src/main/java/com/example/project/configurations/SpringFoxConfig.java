@@ -12,27 +12,27 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @OpenAPIDefinition(
-  info = @Info(
-    contact = @Contact(
-      name = "Denys Soldatenko",
-      email = "john.doe@example.com",
-      url = "https://example.com/about"
+    info = @Info(
+      contact = @Contact(
+        name = "Denys Soldatenko",
+        email = "john.doe@example.com",
+        url = "https://example.com/about"
+      ),
+      title = "MongoDB project API",
+      version = "1.0",
+      description = "MongoDB project API Information",
+      license = @License(
+        name = "Example License",
+        url = "https://example.com"
+      ),
+      termsOfService = "https://example.com/terms"
     ),
-    title = "MongoDB project API",
-    version = "1.0",
-    description = "MongoDB project API Information",
-    license = @License(
-      name = "Example License",
-      url = "https://example.com"
-    ),
-    termsOfService = "https://example.com/terms"
-  ),
-  servers = {
-    @Server(
-      url = "http://localhost:8080",
-      description = "Local server"
-    )
-  }
+    servers = {
+        @Server(
+          url = "http://localhost:8080",
+          description = "Local server"
+        )
+    }
 )
 public class SpringFoxConfig {
 
